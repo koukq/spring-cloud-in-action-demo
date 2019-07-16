@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="30">
+    <!-- 日志颜色效果需要在启动参数加入 -Dlog4j.skipJansi=false-->
+    <Properties>
+        <!--系统变量  ${sys:logPath:-/var/logs} 读取系统变量logPath的值，如果为空则设默认值：/var/logs-->
+        <!--环境变量  $${env:USER:-jdoe} 读取环境变量USER的值，如果为空则设默认值：jdoe-->
+       <Property name="LOG_HOME">${sys:catalina.home:-.}/logs</Property>
+        <Property name="LOG_BACK_HOME">${sys:catalina.home:-.}/logs/backup</Property>
+        <Property name="CONSOLE_PATTERN_LAYOUT">%date %yellow{[%-5.5level]} [%-10.10thread] %cyan{[%-50.50class:%-4.4line]} - %msg%xEx%n </Property>
+        <Property name="LOG_PATTERN_LAYOUT">%date [%-5.5level] [%-10.10thread] [%-50.50class:%-4.4line] - %msg%xEx%n </Property>
+        <Property name="DEFAULT_CHARSET">UTF-8</Property>
+        <Property name="ERROR_FILE_NAME">error</Property>
+        <Property name="INFO_FILE_NAME">info</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- 定义控制台输出 -->
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout charset="${DEFAULT_CHARSET}" pattern="${CONSOLE_PATTERN_LAYOUT}"/>
+        </Console>
+
+        <!-- 配置日常日志 -->
+        <RollingFile name="${INFO_FILE_NAME}" fileName="${LOG_HOME}/${INFO_FILE_NAME}.log" filePattern="${LOG_BACK_HOME}/$${date:yyyy-MM}/${INFO_FILE_NAME}-%d{yyyy-MM-dd}.log.gz" append="true">
+            <PatternLayout charset="${DEFAULT_CHARSET}" pattern="${LOG_PATTERN_LAYOUT}"/>
+            <!-- 设置策略 -->
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            </Policies>
+            <DefaultRolloverStrategy >
+                <!--删除30天前的日志-->
+                <Delete basePath="${LOG_BACK_HOME}" maxDepth="2">
+                    <IfFileName glob="*/*.log.gz" />
+                    <IfLastModified age="30d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+            <Filters>
+                <!--级别大于等于INFO的日志可以写入-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+        <!-- 配置错误日志 -->
+        <RollingFile name="${ERROR_FILE_NAME}" fileName="${LOG_HOME}/${ERROR_FILE_NAME}.log" filePattern="${LOG_BACK_HOME}/$${date:yyyy-MM}/${ERROR_FILE_NAME}-%d{yyyy-MM-dd}.log.gz" append="true">
+            <PatternLayout charset="${DEFAULT_CHARSET}" pattern="${LOG_PATTERN_LAYOUT}"/>
+            <!-- 设置策略 -->
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            </Policies>
+            <Filters>
+                <!--级别大于等于WARN的日志可以写入-->
+                <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.springframework" level="INFO" additivity = "false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="${INFO_FILE_NAME}"/>
+            <AppenderRef ref="${ERROR_FILE_NAME}"/>
+        </Logger>
+        <Logger name="com.myfutech" level="INFO" additivity = "false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="${INFO_FILE_NAME}"/>
+            <AppenderRef ref="${ERROR_FILE_NAME}"/>
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="${INFO_FILE_NAME}"/>
+            <AppenderRef ref="${ERROR_FILE_NAME}"/>
+        </Root>
+    </Loggers>
+</Configuration>

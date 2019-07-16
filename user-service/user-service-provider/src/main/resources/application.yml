@@ -27,7 +27,7 @@ spring:
               cacheServerConfiguration: true
               elideSetAutoCommits: true
               maintainTimeStats: false
-     url: jdbc:mysql://127.0.0.1:3306/unif_demo?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2b8&useSSL=false
+     url: jdbc:mysql://127.0.0.1:3306/cloud_demo?autoReconnect=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=GMT%2b8&useSSL=false
      driverClassName: com.mysql.jdbc.Driver
      username: root
      password: root
